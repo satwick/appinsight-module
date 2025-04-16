@@ -1,0 +1,56 @@
+terraform {
+  # backend "azurerm" {}
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~>3.73.0"
+    }
+  }
+}
+provider "azurerm" {
+  skip_provider_registration = "true"
+  features {}
+}
+
+module "app_insights" {
+  source              = "../../module/app-insights"
+  name                = var.insight_name
+  location            = var.insight_location
+  resource_group_name = var.insight_rg
+  workspace_name      = var.log_analytic_workspace
+  workspace_rg        = var.log_analytic_rg
+}
+
+
+# Source VNet
+variable "insight_name" {
+  description = "application insight name"
+  type        = string
+}
+
+variable "insight_location" {
+  description = "application insight location"
+  type        = string
+}
+
+variable "insight_rg" {
+  description = "application insight RG"
+  type        = string
+}
+
+variable "log_analytic_workspace" {
+  description = "log analytic workspace name"
+  type        = string
+}
+
+variable "log_analytic_rg" {
+  description = "log analytic workspace RG"
+  type        = string
+}
+
+insight_name           = "test-insight"
+insight_location       = "West Europe"
+insight_rg             = "dflbus-dev-rg"
+log_analytic_workspace = "DefaultWorkspace-0e0e853b-e368-4e8c-a4a4-1e2d37b3e2bb-WEU"
+log_analytic_rg        = "defaultresourcegroup-weu"
