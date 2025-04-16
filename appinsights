@@ -1,0 +1,92 @@
+# ####################
+# # Provider section #
+# ####################
+
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~>3.73.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  skip_provider_registration = "true"
+  features { }
+}
+
+
+#####################
+# Resources section #
+#####################
+data "azurerm_resource_group" "rg" {
+  name = "var.workspace_rg"
+}
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/log_analytics_workspace
+data "azurerm_log_analytics_workspace" "workspace" {
+  name                = "var.workspace_name"
+  resource_group_name = "data.azurerm_resource_group.rg.name"
+}
+
+
+
+#https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_insights
+
+resource "azurerm_application_insights" "app_insight" {
+  name                = var.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  application_type    = var.application_type
+  workspace_id        = data.azurerm_log_analytics_workspace.workspace.id
+}
+
+
+
+
+variables.tf
+--------------------------------------------------------------
+# Common
+
+variable "name" {
+  description = "name of application insight"
+  type        = string
+}
+
+variable "location" {
+  description = "Location of the resource"
+  type        = string
+}
+
+variable "resource_group_name" {
+  description = "Name of the resource group for app insight"
+  type        = string
+}
+
+variable "application_type" {
+  description = " Type of application, can be wen or others"
+  type        = string
+  default     = "web"
+}
+
+variable "workspace_name" {
+  description = "workspace name"
+  type        = string
+}
+
+variable "workspace_rg" {
+  description = "workspace_rg"
+  type        = string
+}
+
+
+output.tf
+  output "id" {
+  description = "ID of the application insight"
+  value       = azurerm_application_insights.app_insight.id
+}
+
+output "connection_string" {
+  description = "connection string for app to connect"
+  value       = azurerm_application_insights.app_insight.connection_string
+}
